@@ -20,10 +20,14 @@ public class ChatViewModel extends ViewModel {
     private final SingleLiveEvent<String> _channelError = new SingleLiveEvent<>();
     public LiveData<String> channelError = _channelError;
 
+    private final SingleLiveEvent<Boolean> _loading = new SingleLiveEvent<>();
+    public LiveData<Boolean> loading = _loading;
+
     private final MutableLiveData<ArrayList<Channel>> _channels = new MutableLiveData<>();
     public LiveData<ArrayList<Channel>> channels = _channels;
 
     public ChatViewModel() {
+        _loading.postValue(true);
         Call<ChannelResponse> call = ApiService.getInstance().getChannels();
         call.enqueue(new Callback<ChannelResponse>() {
             @Override
@@ -34,15 +38,18 @@ public class ChatViewModel extends ViewModel {
                         ArrayList<Channel> channels = data.getChannels();
                         channels.removeIf(s -> s.getLastMessage() == null);
                         _channels.postValue(channels);
+                        _loading.postValue(false);
                     }
                 } else {
                     _channelError.postValue(response.message());
+                    _loading.postValue(false);
                 }
             }
 
             @Override
             public void onFailure(Call<ChannelResponse> call, Throwable t) {
                 _channelError.postValue(t.getLocalizedMessage());
+                _loading.postValue(false);
             }
         });
     }

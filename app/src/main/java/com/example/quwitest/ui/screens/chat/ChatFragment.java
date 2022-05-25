@@ -62,6 +62,14 @@ public class ChatFragment extends Fragment {
             Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
         });
 
+        chatViewModel.loading.observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading) {
+                binding.progressBar.setVisibility(View.VISIBLE);
+            } else {
+                binding.progressBar.setVisibility(View.GONE);
+            }
+        });
+
         chatViewModel.channels.observe(getViewLifecycleOwner(), channels -> {
             chatAdapter.submitList(channels);
         });
